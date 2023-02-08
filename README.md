@@ -1,13 +1,19 @@
-# Sample Hardhat Project
+# CantoSub Smart Contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+>Install the required dependencies
 
-Try running some of the following tasks:
+    yarn install
+    
+>Unit test 
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
+    npx hardhat test   
+
+> Generate typechain
++ Clean existing typings
+    ```
+    npx hardhat clean
+    ```
++ Generate all typings
+    ```
+    npx hardhat typechain
+    ```
