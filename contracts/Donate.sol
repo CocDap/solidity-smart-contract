@@ -83,7 +83,12 @@ contract Donate {
         return balancesOf[msg.sender];
     }
 
-    function getPost(string memory url) public view returns (Post memory) {
+    function getPost(string memory baseUrl, string memory id)
+        public
+        view
+        returns (Post memory)
+    {
+        string memory url = string(abi.encodePacked(baseUrl, id));
         return posts[url];
     }
 }
