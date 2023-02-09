@@ -2,86 +2,105 @@
 pragma solidity ^0.8.9;
 
 contract Donate {
-
-
     struct Post {
         address creator;
         bool isClaimed;
-        uint donateAmount;
-
+        uint256 donateAmount;
     }
 
-    mapping (address => uint) public balancesOf;
+    mapping(address => uint256) public balancesOf;
 
     mapping(string => Post) public posts;
 
-    mapping(address => string[] ) public donated;
+    mapping(address => string[]) public donated;
 
     // Content count
     uint32 public idCount;
 
+    function createPost(
+        string memory baseUrl,
+        string memory id,
+        uint256 amount
+    ) public {
+        Post memory newPost = Post(msg.sender, false, amount);
+        string memory url = string(abi.encodePacked(baseUrl, id));
 
-    function createPost(string memory id, uint amount) public {
-        
-        Post memory newPost = Post(
-            msg.sender,
-            false,
-            amount
-        );
+        posts[url] = newPost;
 
-        posts[id] = newPost;
-
-        idCount +=1;
-
-
+        idCount += 1;
     }
 
-    function deposit(string memory id) public payable {
+    function deposit(string memory baseUrl, string memory id) public payable {
         require(msg.value > 0, "Deposit amount must be greater than 0.");
 
-        Post storage post = posts[id];
+        string memory url = string(abi.encodePacked(baseUrl, id));
+        Post storage post = posts[url];
 
-        require(msg.value == post.donateAmount, "Donate amount is equal by value sender");
-        
+        require(
+            msg.value == post.donateAmount,
+            "Donate amount is equal by value sender"
+        );
 
         balancesOf[msg.sender] += msg.value;
 
         string[] storage allIds = donated[msg.sender];
 
-        allIds.push(id);
+        allIds.push(url);
 
         // Storage users deposit for specific id
         donated[msg.sender] = allIds;
     }
 
-
-    function claim(string[] memory idPosts) public {
-
-        uint totalAmount;
-        for (uint i =0; i < idPosts.length; i++) {
-            Post storage post = posts[idPosts[i]];
-            if (post.creator == msg.sender) {
+    function claim(string[] memory urlPosts) public {
+        uint256 totalAmount;
+        for (uint256 i = 0; i < urlPosts.length; i++) {
+            Post storage post = posts[urlPosts[i]];
+            if (post.creator == msg.sender && !post.isClaimed) {
                 totalAmount += post.donateAmount;
+                post.isClaimed = true;
             }
-        
         }
 
+        require(totalAmount > 0, "You have no donation to claim.");
+        require(
+            totalAmount <= address(this).balance,
+            "Insufficient balance to withdraw."
+        );
 
-        require(totalAmount <= address(this).balance, "Insufficient balance to withdraw.");
         payable(msg.sender).transfer(totalAmount);
-
-        
     }
 
     function getDonatedPost() public view returns (string[] memory) {
-    
         string[] memory allPosts = new string[](idCount);
 
-        for (uint i =0; i < idCount; i++) {
+        for (uint256 i = 0; i < idCount; i++) {
             allPosts[i] = donated[msg.sender][i];
-        
-        }   
+        }
 
-        return allPosts; 
+        return allPosts;
+    }
+
+    function getBalance() public view returns (uint256) {
+        return balancesOf[msg.sender];
+    }
+
+    function getPost(string memory baseUrl, string memory id)
+        public
+        view
+        returns (Post memory)
+    {
+        string memory url = string(abi.encodePacked(baseUrl, id));
+        return posts[url];
+    }
+
+    function hasDonateForPost(string memory baseUrl, string memory id)
+        public
+        view
+        returns (bool)
+    {
+        string memory url = string(abi.encodePacked(baseUrl, id));
+        Post memory post = posts[url];
+
+        return post.creator == msg.sender;
     }
 }
