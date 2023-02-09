@@ -92,4 +92,15 @@ contract Donate {
         string memory url = string(abi.encodePacked(baseUrl, id));
         return posts[url];
     }
+
+    function hasDonateForPost(string memory baseUrl, string memory id)
+        public
+        view
+        returns (bool)
+    {
+        string memory url = string(abi.encodePacked(baseUrl, id));
+        Post memory post = posts[url];
+
+        return post.creator == msg.sender;
+    }
 }
