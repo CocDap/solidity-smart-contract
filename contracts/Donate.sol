@@ -12,6 +12,7 @@ contract Donate {
 
     mapping(string => Post) public posts;
 
+    //Track whether users have made a donation or not.
     mapping(address => string[]) public donated;
 
     // Content count
@@ -99,8 +100,13 @@ contract Donate {
         returns (bool)
     {
         string memory url = string(abi.encodePacked(baseUrl, id));
-        Post memory post = posts[url];
 
-        return post.creator == msg.sender;
+        for (uint256 i = 0; i < idCount; i++) {
+            if (keccak256(abi.encodePacked(donated[msg.sender][i])) == keccak256(abi.encodePacked(url))) {
+                return true;
+            }
+
+        }
+        return false;
     }
 }
