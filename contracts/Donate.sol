@@ -30,9 +30,10 @@ contract Donate {
         idCount += 1;
     }
 
-    function deposit(string memory url) public payable {
+    function deposit(string memory baseUrl, string memory id) public payable {
         require(msg.value > 0, "Deposit amount must be greater than 0.");
 
+        string memory url = string(abi.encodePacked(baseUrl, id));
         Post storage post = posts[url];
 
         require(
