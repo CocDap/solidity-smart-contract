@@ -93,14 +93,21 @@ contract Donate {
         return posts[url];
     }
 
-    function hasDonateForPost(string memory baseUrl, string memory id)
-        public
-        view
-        returns (bool)
-    {
+    function hasDonateForPost(
+        string memory baseUrl,
+        string memory id,
+        address addr
+    ) public view returns (bool) {
         string memory url = string(abi.encodePacked(baseUrl, id));
-        Post memory post = posts[url];
 
-        return post.creator == msg.sender;
+        for (uint256 i = 0; i < idCount; i++) {
+            if (
+                keccak256(abi.encodePacked(donated[addr][i])) ==
+                keccak256(abi.encodePacked(url))
+            ) {
+                return true;
+            }
+        }
+        return false;
     }
 }
