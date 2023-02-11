@@ -12,6 +12,7 @@ contract Donate {
 
     mapping(string => Post) public posts;
 
+    //Track whether users have made a donation or not.
     mapping(address => string[]) public donated;
 
     // Content count
