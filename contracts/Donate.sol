@@ -6,6 +6,7 @@ contract Donate {
         address creator;
         bool isClaimed;
         uint256 donateAmount;
+        uint256 totalDonatedAmount;
     }
 
     mapping(address => uint256) public balancesOf;
@@ -23,7 +24,7 @@ contract Donate {
         string memory id,
         uint256 amount
     ) public {
-        Post memory newPost = Post(msg.sender, false, amount);
+        Post memory newPost = Post(msg.sender, false, amount,0);
         string memory url = string(abi.encodePacked(baseUrl, id));
 
         posts[url] = newPost;
@@ -42,6 +43,7 @@ contract Donate {
             "Donate amount is equal by value sender"
         );
 
+        post.totalDonatedAmount += msg.value;
         balancesOf[msg.sender] += msg.value;
 
         string[] storage allIds = donated[msg.sender];
@@ -57,7 +59,7 @@ contract Donate {
         for (uint256 i = 0; i < urlPosts.length; i++) {
             Post storage post = posts[urlPosts[i]];
             if (post.creator == msg.sender && !post.isClaimed) {
-                totalAmount += post.donateAmount;
+                totalAmount += post.totalDonatedAmount;
                 post.isClaimed = true;
             }
         }
@@ -94,18 +96,20 @@ contract Donate {
         return posts[url];
     }
 
-    function hasDonateForPost(string memory baseUrl, string memory id)
-        public
-        view
-        returns (bool)
-    {
+    function hasDonateForPost(
+        string memory baseUrl,
+        string memory id,
+        address addr
+    ) public view returns (bool) {
         string memory url = string(abi.encodePacked(baseUrl, id));
 
         for (uint256 i = 0; i < idCount; i++) {
-            if (keccak256(abi.encodePacked(donated[msg.sender][i])) == keccak256(abi.encodePacked(url))) {
+            if (
+                keccak256(abi.encodePacked(donated[addr][i])) ==
+                keccak256(abi.encodePacked(url))
+            ) {
                 return true;
             }
-
         }
         return false;
     }
